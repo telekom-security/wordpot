@@ -1,6 +1,6 @@
-# Wordpot 3.0.1
+# Wordpot 3.0.3
 
-Wordpot 3.0.1 is a safe WordPress honeypot. It emulates enough of a real WordPress
+Wordpot 3.0.3 is a safe WordPress honeypot. It emulates enough of a real WordPress
 installation to attract scanners, credential attacks, XML-RPC probes, REST API
 enumeration, plugin and theme fingerprinting, and common payload delivery
 attempts. It does not run PHP, does not connect to a database, does not fetch

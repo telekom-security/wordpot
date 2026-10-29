@@ -566,7 +566,7 @@ def test_cli_version_outputs_version_without_startup_banner():
         timeout=10,
     )
 
-    assert result.stdout.strip() == "Wordpot 3.0.1"
+    assert result.stdout.strip() == "Wordpot 3.0.3"
 
 
 def test_startup_banner_flushes_stdout(monkeypatch):
@@ -581,7 +581,7 @@ def test_startup_banner_flushes_stdout(monkeypatch):
 
     assert printed
     assert printed[0][1]["flush"] is True
-    assert "Wordpot 3.0.1" in printed[0][0][0]
+    assert "Wordpot 3.0.3" in printed[0][0][0]
 
 
 def test_readme_documents_config_and_event_fields():
