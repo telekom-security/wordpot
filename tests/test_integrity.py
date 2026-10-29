@@ -171,3 +171,55 @@ def test_hpfeeds_client_is_created_per_process(monkeypatch):
     monkeypatch.setitem(events_module._HPFEEDS_STATE, "pid", -1)
     events_module.publish_event({"request_id": "hp-3"})
     assert len(created) == 2
+
+
+def test_hpfeeds_forwards_only_non_sensitive_event_fields(monkeypatch, event_log):
+    class FakeClient:
+        def __init__(self):
+            self.published = []
+
+        def publish(self, topic, line):
+            self.published.append((topic, line))
+
+    client = FakeClient()
+    monkeypatch.setitem(app.config, "HPFEEDS_ENABLED", True)
+    monkeypatch.setattr(events_module, "_create_hpfeeds_client", lambda: client)
+    monkeypatch.setattr(events_module, "_HPFEEDS_STATE", {"pid": None, "client": None})
+    event = {
+        "timestamp": "2026-10-29T12:00:00+00:00",
+        "request_id": "request-1",
+        "src_ip": "203.0.113.10",
+        "src_port": 12345,
+        "dest_ip": "192.0.2.10",
+        "dest_port": 80,
+        "method": "POST",
+        "technique": "login",
+        "payload_size": 24,
+        "url": "http://example.test/?token=url-secret",
+        "query": "token=query-secret",
+        "headers_subset": {"Authorization": "Basic auth-secret"},
+        "payload_excerpt": "body-secret",
+        "username": "user-secret",
+        "password": "password-secret",
+        "credentials_observed": {"basic_password": "auth-secret"},
+        "details": {"credential_pairs": [{"username": "xml-user", "password": "xml-secret"}]},
+        "future_field": "future-secret",
+    }
+
+    events_module.publish_event(event)
+
+    assert read_events(event_log) == [event]
+    assert len(client.published) == 1
+    topic, line = client.published[0]
+    assert topic == app.config["HPFEEDS_TOPIC"]
+    assert json.loads(line) == {
+        "timestamp": "2026-10-29T12:00:00+00:00",
+        "request_id": "request-1",
+        "src_ip": "203.0.113.10",
+        "src_port": 12345,
+        "dest_ip": "192.0.2.10",
+        "dest_port": 80,
+        "method": "POST",
+        "technique": "login",
+        "payload_size": 24,
+    }

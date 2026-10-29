@@ -40,6 +40,27 @@ SENSITIVE_FORM_KEYS = {
     "user_pass",
 }
 
+HPFEEDS_EVENT_FIELDS = (
+    "timestamp",
+    "request_id",
+    "profile_id",
+    "src_ip",
+    "src_port",
+    "dest_ip",
+    "dest_port",
+    "browser_family",
+    "browser_version",
+    "os_family",
+    "os_version",
+    "device_family",
+    "method",
+    "component_type",
+    "technique",
+    "response_status",
+    "payload_size",
+    "payload_stored",
+)
+
 
 def request_id():
     if not hasattr(g, "request_id"):
@@ -522,6 +543,14 @@ def _hpfeeds_client():
     return _HPFEEDS_STATE["client"]
 
 
+def hpfeeds_event_summary(event):
+    return {
+        key: event[key]
+        for key in HPFEEDS_EVENT_FIELDS
+        if key in event
+    }
+
+
 def publish_event(event):
     from wordpot import app
 
@@ -534,8 +563,9 @@ def publish_event(event):
     if not app.config.get("HPFEEDS_ENABLED"):
         return
     try:
+        hpfeeds_line = json.dumps(hpfeeds_event_summary(event), sort_keys=True)
         with _HPFEEDS_LOCK:
-            _hpfeeds_client().publish(app.config["HPFEEDS_TOPIC"], line)
+            _hpfeeds_client().publish(app.config["HPFEEDS_TOPIC"], hpfeeds_line)
     except Exception as exc:
         _HPFEEDS_STATE["client"] = None
         LOGGER.warning("Unable to publish hpfeeds event: %s", exc)

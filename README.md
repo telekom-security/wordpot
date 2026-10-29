@@ -228,12 +228,17 @@ Configuration reference:
 | `VERSION` | Fallback WordPress version when no profile supplies `core_version`. |
 | `AUTHORS` | Fallback author slugs. Profiles should use structured author objects. |
 | `PROFILES` | Optional custom profile list. Leave unset to use the built-in rotating personas. |
-| `HPFEEDS_ENABLED` | Enables optional hpfeeds forwarding for JSONL event lines. |
+| `HPFEEDS_ENABLED` | Enables optional hpfeeds forwarding of a redacted event summary. |
 | `HPFEEDS_HOST` | hpfeeds broker host. |
 | `HPFEEDS_PORT` | hpfeeds broker port. |
 | `HPFEEDS_IDENT` | hpfeeds identity. |
 | `HPFEEDS_SECRET` | hpfeeds secret. |
 | `HPFEEDS_TOPIC` | hpfeeds topic used for published Wordpot events. |
+
+HPFeeds receives only an allowlisted event summary; request URLs, headers,
+credentials, payload content, and event details remain in the local JSONL log.
+The hpfeeds connection itself is unencrypted, so use HPFeeds only on a trusted
+network or through a secure tunnel.
 
 Plugin and theme installation is controlled by profiles. Requests for plugin or
 theme slugs not present in the active profile return 404.
